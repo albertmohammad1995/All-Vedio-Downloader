@@ -71,14 +71,12 @@ public class MainActivity extends AppCompatActivity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        // JavaScript ইন্টারফেস যুক্ত করা হলো
         webView.addJavascriptInterface(new WebAppInterface(this), "AndroidDownloader");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // কাস্টম অ্যাপ স্কিম (যেমন fb://) হ্যান্ডেল করার জন্য
-                if (url.startsWith("fb://") || url.startsWith("instagram://") || url.startsWith("whatsapp://")) {
+                if (url.startsWith("fb://") || url.startsWith("instagram://")) {
                     try {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                         startActivity(intent);
@@ -99,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     swipeRefreshLayout.setRefreshing(false);
                 }
                 etSearch.setText("");
-                injectDownloadButtonScript(view);
+                injectSmartDownloadScript(view);
             }
         });
 
@@ -126,16 +124,21 @@ public class MainActivity extends AppCompatActivity {
 
         webView.loadUrl("https://www.facebook.com");
 
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            webView.reload();
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> webView.reload());
 
+        // স্মার্ট সার্চ বার লজিক: ফেসবুক বা ইউটিউব লিংক আলাদাভাবে হ্যান্ডেল করার ব্যবস্থা
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 String query = etSearch.getText().toString().trim();
                 if (!query.isEmpty()) {
                     etSearch.clearFocus();
-                    if (query.startsWith("http://") || query.startsWith("https://")) {
+                    if (query.contains("facebook.com") || query.contains("fb.watch")) {
+                        Toast.init(MainActivity.this, "Processing Facebook Link...", Toast.LENGTH_SHORT).show();
+                        webView.loadUrl(query);
+                    } else if (query.contains("youtube.com") || query.contains("youtu.be")) {
+                        Toast.makeText(MainActivity.this, "Processing YouTube Link...", Toast.LENGTH_SHORT).show();
+                        webView.loadUrl(query);
+                    } else if (query.startsWith("http://") || query.startsWith("https://")) {
                         webView.loadUrl(query);
                     } else if (query.contains(".")) {
                         webView.loadUrl("https://" + query);
@@ -170,20 +173,12 @@ public class MainActivity extends AppCompatActivity {
             etSearch.clearFocus();
         });
 
-        webView.setDownloadListener(new DownloadListener() {
-            @Override
-            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
-                triggerDownloadFlow(url);
-            }
-        });
+        webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> triggerDownloadFlow(url));
     }
 
     public class WebAppInterface {
         Context mContext;
-
-        WebAppInterface(Context c) {
-            mContext = c;
-        }
+        WebAppInterface(Context c) { mContext = c; }
 
         @JavascriptInterface
         public void downloadVideo(String videoUrl) {
@@ -194,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
     private void triggerDownloadFlow(String url) {
         if (url == null || url.isEmpty()) return;
         pendingDownloadUrl = url;
-        Toast.makeText(MainActivity.this, "Please wait, preparing download...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Please wait, opening ad...", Toast.LENGTH_SHORT).show();
 
         if (mInterstitialAd != null) {
             mInterstitialAd.show(MainActivity.this);
@@ -204,10 +199,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void injectDownloadButtonScript(WebView view) {
+    private void injectSmartDownloadScript(WebView view) {
         String jsCode = "javascript:(function() {" +
-                "  if (window.downloaderInjectedLoaded) return;" +
-                "  window.downloaderInjectedLoaded = true;" +
+                "  if (window.smartDownloaderLoaded) return;" +
+                "  window.smartDownloaderLoaded = true;" +
                 "  setInterval(function() {" +
                 "    var videos = document.querySelectorAll('video');" +
                 "    videos.forEach(function(video) {" +
@@ -240,8 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 "            if(src && !src.startsWith('blob:')) {" +
                 "              AndroidDownloader.downloadVideo(src);" +
                 "            } else {" +
-                "              var currentUrl = window.location.href;" +
-                "              AndroidDownloader.downloadVideo(currentUrl);" +
+                "              AndroidDownloader.downloadVideo(window.location.href);" +
                 "            }" +
                 "          };" +
                 "          container.appendChild(btn);" +
