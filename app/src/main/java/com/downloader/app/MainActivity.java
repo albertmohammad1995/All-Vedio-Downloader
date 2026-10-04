@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText etSearch;
     private WebView webView;
     private Button btnFacebook, btnInstagram, btnYoutube, btnX;
+    private SwipeRefreshLayout swipeRefreshLayout;
     
     private InterstitialAd mInterstitialAd;
     private String pendingDownloadUrl = "";
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         btnInstagram = findViewById(R.id.btnInstagram);
         btnYoutube = findViewById(R.id.btnYoutube);
         btnX = findViewById(R.id.btnX);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -66,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        // JavaScript ইন্টারফেস যুক্ত করা হলো, যা ভিডিওর কোণায় থাকা ডাউনলোড বাটনে ক্লিক করলে কাজ করবে
+        // JavaScript ইন্টারফেস যুক্ত করা হলো
         webView.addJavascriptInterface(new WebAppInterface(this), "AndroidDownloader");
 
         webView.setWebViewClient(new WebViewClient() {
@@ -80,13 +83,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                // পেজ লোড হওয়ার পর সোশ্যাল মিডিয়ার ভিডিওগুলোর কোণায় ডাউনলোড বাটন বসানোর জাভাস্ক্রিপ্ট ইনজেক্ট করা হবে
+                // পেজ লোড সম্পন্ন হলে সোয়াইপ রিফ্রেশ অ্যানিমেশন বন্ধ করে দেওয়া হবে
+                if (swipeRefreshLayout != null) {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+                // ভিডিওর কোণায় ডাউনলোড বাটন ইনজেক্ট করার স্ক্রিপ্ট
                 injectDownloadButtonScript(view);
             }
         });
 
         webView.setWebChromeClient(new WebChromeClient());
         webView.loadUrl("https://www.facebook.com");
+
+        // SwipeRefreshLayout লিচেনার (ওপরে টান দিলে পেজ রিফ্রেশ হবে)
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            webView.reload();
+        });
 
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
