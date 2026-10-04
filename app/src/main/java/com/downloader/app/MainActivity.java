@@ -10,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -65,12 +66,22 @@ public class MainActivity extends AppCompatActivity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
+        // JavaScript ইন্টারফেস যুক্ত করা হলো, যা ভিডিওর কোণায় থাকা ডাউনলোড বাটনে ক্লিক করলে কাজ করবে
+        webView.addJavascriptInterface(new WebAppInterface(this), "AndroidDownloader");
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
                 etSearch.setText(url);
                 return true;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                // পেজ লোড হওয়ার পর সোশ্যাল মিডিয়ার ভিডিওগুলোর কোণায় ডাউনলোড বাটন বসানোর জাভাস্ক্রিপ্ট ইনজেক্ট করা হবে
+                injectDownloadButtonScript(view);
             }
         });
 
@@ -111,20 +122,83 @@ public class MainActivity extends AppCompatActivity {
             etSearch.setText("https://twitter.com");
         });
 
+        // পুরোনো DownloadListener ব্যাকআপ হিসেবে রাখা হলো
         webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
-                pendingDownloadUrl = url;
-                Toast.makeText(MainActivity.this, "Please wait, opening ad...", Toast.LENGTH_SHORT).show();
-
-                if (mInterstitialAd != null) {
-                    mInterstitialAd.show(MainActivity.this);
-                } else {
-                    executeDownload(pendingDownloadUrl);
-                    loadAdMobAd();
-                }
+                triggerDownloadFlow(url);
             }
         });
+    }
+
+    // জাভাস্ক্রিপ্ট থেকে কল করার জন্য ক্লাস
+    public class WebAppInterface {
+        Context mContext;
+
+        WebAppInterface(Context c) {
+            mContext = c;
+        }
+
+        @JavascriptInterface
+        public void downloadVideo(String videoUrl) {
+            runOnUiThread(() -> triggerDownloadFlow(videoUrl));
+        }
+    }
+
+    // অ্যাড ও ডাউনলোড ফ্লো হ্যান্ডেল করার সেন্ট্রাল মেথড
+    private void triggerDownloadFlow(String url) {
+        if (url == null || url.isEmpty()) return;
+        pendingDownloadUrl = url;
+        Toast.makeText(MainActivity.this, "Please wait, opening ad...", Toast.LENGTH_SHORT).show();
+
+        if (mInterstitialAd != null) {
+            mInterstitialAd.show(MainActivity.this);
+        } else {
+            executeDownload(pendingDownloadUrl);
+            loadAdMobAd();
+        }
+    }
+
+    // ভিডিওর কোণায় কাস্টম ডাউনলোড বাটন দেখানোর জাভাস্ক্রিপ্ট কোড ইনজেকশন
+    private void injectDownloadButtonScript(WebView view) {
+        String jsCode = "javascript:(function() {" +
+                "  setInterval(function() {" +
+                "    var videos = document.querySelectorAll('video');" +
+                "    videos.forEach(function(video) {" +
+                "      if (!video.dataset.downloadInjected) {" +
+                "        video.dataset.downloadInjected = 'true';" +
+                "        var container = video.parentElement;" +
+                "        if (container) {" +
+                "          container.style.position = 'relative';" +
+                "          var btn = document.createElement('button');" +
+                "          btn.innerHTML = '⬇ Download';" +
+                "          btn.style.position = 'absolute';" +
+                "          btn.style.top = '10px';" +
+                "          btn.style.right = '10px';" +
+                "          btn.style.zIndex = '999999';" +
+                "          btn.style.background = '#ff0000';" +
+                "          btn.style.color = '#ffffff';" +
+                "          btn.style.border = 'none';" +
+                "          btn.style.padding = '8px 12px';" +
+                "          btn.style.borderRadius = '5px';" +
+                "          btn.style.fontWeight = 'bold';" +
+                "          btn.style.cursor = 'pointer';" +
+                "          btn.onclick = function(e) {" +
+                "            e.stopPropagation();" +
+                "            var src = video.src || (video.querySelector('source') ? video.querySelector('source').src : '');" +
+                "            if(src) {" +
+                "              AndroidDownloader.downloadVideo(src);" +
+                "            } else {" +
+                "              alert('Video link not found directly. Try playing the video first.');" +
+                "            }" +
+                "          };" +
+                "          container.appendChild(btn);" +
+                "        }" +
+                "      }" +
+                "    });" +
+                "  }, 1000);" +
+                "})();";
+        view.evaluateJavascript(jsCode, null);
     }
 
     private void loadAdMobAd() {
