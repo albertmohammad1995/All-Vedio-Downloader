@@ -1,3 +1,4 @@
+// app/java/com/downloader/app/MainActivity.java
 package com.downloader.app;
 
 import android.app.DownloadManager;
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        webSettings.setSupportMultipleWindows(true); // আলাদা ট্যাব বা পপআপ সাপোর্ট করার জন্য
+        webSettings.setSupportMultipleWindows(true);
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
@@ -76,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // ব্রাউজ করার সময় বা লিংক লোড হওয়ার সময় সার্চ বার সর্বদা ফাঁকা রাখা হবে
                 etSearch.setText("");
                 view.loadUrl(url);
                 return true;
@@ -88,14 +88,11 @@ public class MainActivity extends AppCompatActivity {
                 if (swipeRefreshLayout != null) {
                     swipeRefreshLayout.setRefreshing(false);
                 }
-                // সার্চ বারে কোনো লেখা বা ইউআরএল শো করবে না
                 etSearch.setText("");
-                // ভিডিওর ওপর ডাউনলোড বাটন ইনজেকশন স্ক্রিপ্ট
                 injectDownloadButtonScript(view);
             }
         });
 
-        // WebChromeClient-এর মাধ্যমে নতুন ট্যাব বা পপআপ রিকোয়েস্ট হ্যান্ডেল করা হবে যাতে ভিডিও প্লেয়ার আলাদা ট্যাবে খোলে
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
@@ -106,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 newWebView.setWebViewClient(new WebViewClient() {
                     @Override
                     public boolean shouldOverrideUrlLoading(WebView v, String url) {
-                        webView.loadUrl(url); // নতুন ট্যাবের লিংকটি মূল WebView-এ আলাদা প্লেয়ার পেজ হিসেবে লোড করাবে
+                        webView.loadUrl(url);
                         return true;
                     }
                 });
@@ -117,28 +114,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // ডিফল্ট হোমপেজ লোড
         webView.loadUrl("https://www.facebook.com");
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
             webView.reload();
         });
 
-        // ব্যবহারকারী যখন সার্চ বারে কপি করা লিংক পেস্ট করে এন্টার বা সার্চ করবে
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 String query = etSearch.getText().toString().trim();
                 if (!query.isEmpty()) {
                     etSearch.clearFocus();
                     if (query.startsWith("http://") || query.startsWith("https://")) {
-                        // লিংক পেস্ট করলে সেটি আলাদা ডেডিকেটেড ভিডিও প্লেয়ার পেজে লোড হবে
                         webView.loadUrl(query);
                     } else if (query.contains(".")) {
                         webView.loadUrl("https://" + query);
                     } else {
                         webView.loadUrl("https://www.google.com/search?q=" + Uri.encode(query));
                     }
-                    // সার্চ করার পর সার্চ বার সাথে সাথে ফাঁকা হয়ে যাবে
                     etSearch.setText("");
                 }
                 return true;
@@ -146,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // সোশ্যাল বাটনগুলোতে ক্লিক করলে সাইট ওপেন হবে কিন্তু সার্চ বার একদম ফাঁকা থাকবে
         btnFacebook.setOnClickListener(v -> {
             webView.loadUrl("https://www.facebook.com");
             etSearch.setText("");
@@ -189,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // অ্যাডমব অ্যাড শো করার পর অটোমেটিক ডাউনলোড শুরু করার ফ্লো
     private void triggerDownloadFlow(String url) {
         if (url == null || url.isEmpty()) return;
         pendingDownloadUrl = url;
@@ -203,7 +194,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ভিডিওর ওপর আকর্ষণীয় ডাউনলোড বাটন দেখানোর স্ক্রিপ্ট
     private void injectDownloadButtonScript(WebView view) {
         String jsCode = "javascript:(function() {" +
                 "  if (window.downloaderInjectedLoaded) return;" +
@@ -263,7 +253,6 @@ public class MainActivity extends AppCompatActivity {
                         mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                             @Override
                             public void onAdDismissedFullScreenContent() {
-                                // অ্যাড দেখা শেষ বা ক্লোজ হওয়ার সাথে সাথেই অটোমেটিক ডাউনলোড শুরু হবে
                                 executeDownload(pendingDownloadUrl);
                                 loadAdMobAd();
                             }
