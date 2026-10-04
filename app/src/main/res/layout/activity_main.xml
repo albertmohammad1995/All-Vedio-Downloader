@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F6FA">
+
+    <!-- Top Search Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#1877F2"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/etUrlBox"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="#FFFFFF"
+            android:hint="Search or type URL"
+            android:imeOptions="actionGo"
+            android:inputType="textUri"
+            android:paddingHorizontal="12dp"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:textColorHint="#888888"/>
+
+        <Button
+            android:id="@+id/btnGo"
+            android:layout_width="60dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:text="Go"
+            android:textSize="12sp"
+            android:backgroundTint="#FFFFFF"
+            android:textColor="#1877F2"/>
+    </LinearLayout>
+
+    <!-- WebView Container & Floating Download Button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fabDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="24dp"
+            android:text="⬇ Watch Ad &amp; Download"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#00C853"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <!-- Bottom Menu Bar: Facebook, Instagram, YouTube -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:gravity="center"
+        android:padding="6dp">
+
+        <Button
+            android:id="@+id/btnFb"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="3dp"
+            android:text="Facebook"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:backgroundTint="#1877F2"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/btnInsta"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="3dp"
+            android:text="Instagram"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:backgroundTint="#E1306C"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/btnYoutube"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="3dp"
+            android:text="YouTube"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:backgroundTint="#FF0000"
+            android:textColor="#FFFFFF"/>
+    </LinearLayout>
+
+</LinearLayout>
