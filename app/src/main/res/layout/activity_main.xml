@@ -1,29 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:background="#FAF3EE" android:layout_height="match_parent" android:layout_width="match_parent" android:orientation="vertical" android:padding="16dp" xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FAF3EE"
+    android:padding="8dp">
 
     <!-- App Title -->
-    <TextView android:layout_gravity="center_horizontal" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:layout_marginTop="8dp" android:layout_width="wrap_content" android:text="All Video Downloader" android:textColor="#2196F3" android:textSize="24sp" android:textStyle="bold"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="All Video Downloader"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#2196F3"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"/>
 
     <!-- Top Search Bar / URL Input -->
-    <LinearLayout android:background="#FFFFFF" android:elevation="2dp" android:gravity="center_vertical" android:layout_height="50dp" android:layout_width="match_parent" android:orientation="horizontal" android:paddingHorizontal="16dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:background="#FFFFFF"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:elevation="2dp"
+        android:layout_marginBottom="8dp">
 
-        <EditText android:background="@null" android:hint="Search Google or type URL" android:id="@+id/etSearch" android:imeOptions="actionSearch" android:inputType="textUri" android:layout_height="match_parent" android:layout_width="match_parent" android:textColor="#000000" android:textSize="14sp"/>
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:hint="Search Google or type URL"
+            android:inputType="textUri"
+            android:imeOptions="actionSearch"
+            android:textSize="14sp"
+            android:textColor="#000000"/>
     </LinearLayout>
 
-    <!-- Platform Shortcuts Layout (4 Buttons) -->
-    <LinearLayout android:gravity="center" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:layout_marginTop="16dp" android:layout_width="match_parent" android:orientation="horizontal" android:weightSum="4">
+    <!-- Platform Shortcuts Layout (4 Buttons with Icons) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:weightSum="4"
+        android:layout_marginBottom="8dp">
 
-        <Button android:id="@+id/btnFacebook" android:layout_height="50dp" android:layout_marginEnd="4dp" android:layout_weight="1" android:layout_width="0dp" android:text="Facebook" android:textSize="11sp"/>
+        <Button
+            android:id="@+id/btnFacebook"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="3dp"
+            android:text="Facebook"
+            android:textSize="10sp"
+            android:backgroundTint="#1877F2"
+            android:textColor="#FFFFFF"/>
 
-        <Button android:id="@+id/btnInstagram" android:layout_height="50dp" android:layout_marginEnd="4dp" android:layout_weight="1" android:layout_width="0dp" android:text="Instagram" android:textSize="11sp"/>
+        <Button
+            android:id="@+id/btnInstagram"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="3dp"
+            android:text="Instagram"
+            android:textSize="10sp"
+            android:backgroundTint="#E4405F"
+            android:textColor="#FFFFFF"/>
 
-        <Button android:id="@+id/btnYoutube" android:layout_height="50dp" android:layout_marginEnd="4dp" android:layout_weight="1" android:layout_width="0dp" android:text="YouTube" android:textSize="11sp"/>
+        <Button
+            android:id="@+id/btnYoutube"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="3dp"
+            android:text="YouTube"
+            android:textSize="10sp"
+            android:backgroundTint="#FF0000"
+            android:textColor="#FFFFFF"/>
 
-        <Button android:id="@+id/btnX" android:layout_height="50dp" android:layout_weight="1" android:layout_width="0dp" android:text="X / Twitter" android:textSize="10sp"/>
+        <Button
+            android:id="@+id/btnX"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_weight="1"
+            android:text="X / Twitter"
+            android:textSize="9sp"
+            android:backgroundTint="#000000"
+            android:textColor="#FFFFFF"/>
 
     </LinearLayout>
 
-    <!-- WebView for Browsing -->
-    <WebView android:background="#FFFFFF" android:id="@+id/webView" android:layout_height="0dp" android:layout_weight="1" android:layout_width="match_parent"/>
+    <!-- WebView taking the remaining Full Screen space -->
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FFFFFF"/>
 
 </LinearLayout>
