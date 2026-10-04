@@ -85,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                 }
-                etSearch.setText("");
                 view.loadUrl(url);
                 return true;
             }
@@ -97,7 +96,15 @@ public class MainActivity extends AppCompatActivity {
                     swipeRefreshLayout.setRefreshing(false);
                 }
                 etSearch.setText("");
-                injectSmartDownloadScript(view);
+
+                // ডাউনলোডার সাইটগুলোতে গেলে অটোমেটিক বাটন ক্লিক করানোর জাভাস্ক্রিপ্ট ইনজেকশন
+                if (url.contains("fdown.net") || url.contains("loader.to")) {
+                    String autoClickJs = "javascript:(function() {" +
+                        "  var downloadBtn = document.querySelector('button#submit') || document.querySelector('a.download-btn');" +
+                        "  if(downloadBtn) { downloadBtn.click(); }" +
+                        "})();";
+                    view.evaluateJavascript(autoClickJs, null);
+                }
             }
         });
 
@@ -126,19 +133,24 @@ public class MainActivity extends AppCompatActivity {
 
         swipeRefreshLayout.setOnRefreshListener(() -> webView.reload());
 
-        // স্মার্ট সার্চ বার লজিক: ফেসবুক বা ইউটিউব লিংক আলাদাভাবে হ্যান্ডেল করার ব্যবস্থা
+        // মাস্টার সার্চ বার লজিক: ফেসবুকের জন্য fdown.net এবং ইউটিউবের জন্য loader.to কানেক্ট করা
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 String query = etSearch.getText().toString().trim();
                 if (!query.isEmpty()) {
                     etSearch.clearFocus();
+                    
                     if (query.contains("facebook.com") || query.contains("fb.watch")) {
-                        Toast.init(MainActivity.this, "Processing Facebook Link...", Toast.LENGTH_SHORT).show();
-                        webView.loadUrl(query);
-                    } else if (query.contains("youtube.com") || query.contains("youtu.be")) {
-                        Toast.makeText(MainActivity.this, "Processing YouTube Link...", Toast.LENGTH_SHORT).show();
-                        webView.loadUrl(query);
-                    } else if (query.startsWith("http://") || query.startsWith("https://")) {
+                        String encodedUrl = Uri.encode(query);
+                        webView.loadUrl("https://fdown.net/download.php?url=" + encodedUrl);
+                        Toast.makeText(MainActivity.this, "Processing Facebook video...", Toast.LENGTH_SHORT).show();
+                    } 
+                    else if (query.contains("youtube.com") || query.contains("youtu.be")) {
+                        String encodedUrl = Uri.encode(query);
+                        webView.loadUrl("https://en.loader.to/api/button/?url=" + encodedUrl);
+                        Toast.makeText(MainActivity.this, "Processing YouTube video...", Toast.LENGTH_SHORT).show();
+                    } 
+                    else if (query.startsWith("http://") || query.startsWith("https://")) {
                         webView.loadUrl(query);
                     } else if (query.contains(".")) {
                         webView.loadUrl("https://" + query);
@@ -173,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
             etSearch.clearFocus();
         });
 
+        // ডাউনলোড লিংক ইন্টারসেপ্ট করে অ্যাড ফ্লো ট্রিগার করা
         webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> triggerDownloadFlow(url));
     }
 
@@ -186,10 +199,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // প্রথমে অ্যাড শো করবে, অ্যাড শেষ বা ক্লোজ হলে ডাউনলোড শুরু হবে
     private void triggerDownloadFlow(String url) {
         if (url == null || url.isEmpty()) return;
         pendingDownloadUrl = url;
-        Toast.makeText(MainActivity.this, "Please wait, opening ad...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Please wait, preparing download...", Toast.LENGTH_SHORT).show();
 
         if (mInterstitialAd != null) {
             mInterstitialAd.show(MainActivity.this);
@@ -197,54 +211,6 @@ public class MainActivity extends AppCompatActivity {
             executeDownload(pendingDownloadUrl);
             loadAdMobAd();
         }
-    }
-
-    private void injectSmartDownloadScript(WebView view) {
-        String jsCode = "javascript:(function() {" +
-                "  if (window.smartDownloaderLoaded) return;" +
-                "  window.smartDownloaderLoaded = true;" +
-                "  setInterval(function() {" +
-                "    var videos = document.querySelectorAll('video');" +
-                "    videos.forEach(function(video) {" +
-                "      if (!video.dataset.downloadInjected) {" +
-                "        video.dataset.downloadInjected = 'true';" +
-                "        var container = video.parentElement;" +
-                "        if (container) {" +
-                "          container.style.position = 'relative';" +
-                "          var btn = document.createElement('button');" +
-                "          btn.innerHTML = '⬇ Download';" +
-                "          btn.style.position = 'absolute';" +
-                "          btn.style.top = '10px';" +
-                "          btn.style.right = '10px';" +
-                "          btn.style.zIndex = '999999';" +
-                "          btn.style.background = '#ff0000';" +
-                "          btn.style.color = '#ffffff';" +
-                "          btn.style.border = '2px solid #fff';" +
-                "          btn.style.padding = '6px 10px';" +
-                "          btn.style.borderRadius = '6px';" +
-                "          btn.style.fontSize = '12px';" +
-                "          btn.style.fontWeight = 'bold';" +
-                "          btn.style.cursor = 'pointer';" +
-                "          btn.onclick = function(e) {" +
-                "            e.stopPropagation();" +
-                "            var src = video.src || (video.querySelector('source') ? video.querySelector('source').src : '');" +
-                "            if(!src) {" +
-                "               var sourceTag = video.closest('div') ? video.closest('div').querySelector('source') : null;" +
-                "               if(sourceTag) src = sourceTag.src;" +
-                "            }" +
-                "            if(src && !src.startsWith('blob:')) {" +
-                "              AndroidDownloader.downloadVideo(src);" +
-                "            } else {" +
-                "              AndroidDownloader.downloadVideo(window.location.href);" +
-                "            }" +
-                "          };" +
-                "          container.appendChild(btn);" +
-                "        }" +
-                "      }" +
-                "    });" +
-                "  }, 1000);" +
-                "})();";
-        view.evaluateJavascript(jsCode, null);
     }
 
     private void loadAdMobAd() {
@@ -281,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
             request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
             request.setTitle("Downloading Video");
-            request.setDescription("Downloading file from Video Downloader App");
+            request.setDescription("Saving file securely...");
             request.allowScanningByMediaScanner();
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Video_" + System.currentTimeMillis() + ".mp4");
