@@ -76,18 +76,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
-                etSearch.setText(url);
+                // ব্রাউজ করার সময় সার্চ বার সর্বদা ফাঁকা থাকবে
+                etSearch.setText("");
                 return true;
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                // পেজ লোড সম্পন্ন হলে সোয়াইপ রিফ্রেশ অ্যানিমেশন বন্ধ করে দেওয়া হবে
                 if (swipeRefreshLayout != null) {
                     swipeRefreshLayout.setRefreshing(false);
                 }
-                // ভিডিওর কোণায় ডাউনলোড বাটন ইনজেক্ট করার স্ক্রিপ্ট
+                etSearch.setText("");
+                // ভিডিওর ওপর ডাউনলোড বাটন ইনজেকশন স্ক্রিপ্ট
                 injectDownloadButtonScript(view);
             }
         });
@@ -95,46 +96,53 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebChromeClient(new WebChromeClient());
         webView.loadUrl("https://www.facebook.com");
 
-        // SwipeRefreshLayout লিচেনার (ওপরে টান দিলে পেজ রিফ্রেশ হবে)
         swipeRefreshLayout.setOnRefreshListener(() -> {
             webView.reload();
         });
 
+        // ব্যবহারকারী যখন সার্চ বারে ভিডিওর লিংক পেস্ট করে সার্চ করবে
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 String query = etSearch.getText().toString().trim();
                 if (!query.isEmpty()) {
+                    etSearch.clearFocus();
                     if (query.startsWith("http://") || query.startsWith("https://")) {
+                        // সরাসরি পেস্ট করা ভিডিও লিংকটিই লোড হবে, কোনো হোমপেজে রিডাইরেক্ট হবে না
                         webView.loadUrl(query);
                     } else if (query.contains(".")) {
                         webView.loadUrl("https://" + query);
                     } else {
                         webView.loadUrl("https://www.google.com/search?q=" + Uri.encode(query));
                     }
+                    etSearch.setText("");
                 }
                 return true;
             }
             return false;
         });
 
+        // সোশ্যাল বাটনগুলোতে ক্লিক করলে সাধারণ হোমপেজ খুলবে এবং সার্চ বার ফাঁকা থাকবে
         btnFacebook.setOnClickListener(v -> {
             webView.loadUrl("https://www.facebook.com");
-            etSearch.setText("https://www.facebook.com");
+            etSearch.setText("");
+            etSearch.clearFocus();
         });
         btnInstagram.setOnClickListener(v -> {
             webView.loadUrl("https://www.instagram.com");
-            etSearch.setText("https://www.instagram.com");
+            etSearch.setText("");
+            etSearch.clearFocus();
         });
         btnYoutube.setOnClickListener(v -> {
             webView.loadUrl("https://www.youtube.com");
-            etSearch.setText("https://www.youtube.com");
+            etSearch.setText("");
+            etSearch.clearFocus();
         });
         btnX.setOnClickListener(v -> {
             webView.loadUrl("https://twitter.com");
-            etSearch.setText("https://twitter.com");
+            etSearch.setText("");
+            etSearch.clearFocus();
         });
 
-        // পুরোনো DownloadListener ব্যাকআপ হিসেবে রাখা হলো
         webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
@@ -143,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // জাভাস্ক্রিপ্ট থেকে কল করার জন্য ক্লাস
     public class WebAppInterface {
         Context mContext;
 
@@ -157,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // অ্যাড ও ডাউনলোড ফ্লো হ্যান্ডেল করার সেন্ট্রাল মেথড
     private void triggerDownloadFlow(String url) {
         if (url == null || url.isEmpty()) return;
         pendingDownloadUrl = url;
@@ -171,9 +177,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ভিডিওর কোণায় কাস্টম ডাউনলোড বাটন দেখানোর জাভাস্ক্রিপ্ট কোড ইনজেকশন
     private void injectDownloadButtonScript(WebView view) {
         String jsCode = "javascript:(function() {" +
+                "  if (window.downloaderInjectedLoaded) return;" +
+                "  window.downloaderInjectedLoaded = true;" +
                 "  setInterval(function() {" +
                 "    var videos = document.querySelectorAll('video');" +
                 "    videos.forEach(function(video) {" +
@@ -185,30 +192,36 @@ public class MainActivity extends AppCompatActivity {
                 "          var btn = document.createElement('button');" +
                 "          btn.innerHTML = '⬇ Download';" +
                 "          btn.style.position = 'absolute';" +
-                "          btn.style.top = '10px';" +
-                "          btn.style.right = '10px';" +
+                "          btn.style.top = '15px';" +
+                "          btn.style.right = '15px';" +
                 "          btn.style.zIndex = '999999';" +
                 "          btn.style.background = '#ff0000';" +
                 "          btn.style.color = '#ffffff';" +
-                "          btn.style.border = 'none';" +
+                "          btn.style.border = '2px solid #fff';" +
                 "          btn.style.padding = '8px 12px';" +
-                "          btn.style.borderRadius = '5px';" +
+                "          btn.style.borderRadius = '8px';" +
+                "          btn.style.fontSize = '13px';" +
                 "          btn.style.fontWeight = 'bold';" +
+                "          btn.style.boxShadow = '0px 4px 10px rgba(0,0,0,0.5)';" +
                 "          btn.style.cursor = 'pointer';" +
                 "          btn.onclick = function(e) {" +
                 "            e.stopPropagation();" +
                 "            var src = video.src || (video.querySelector('source') ? video.querySelector('source').src : '');" +
+                "            if(!src) {" +
+                "               var sourceTag = video.closest('div').querySelector('source');" +
+                "               if(sourceTag) src = sourceTag.src;" +
+                "            }" +
                 "            if(src) {" +
                 "              AndroidDownloader.downloadVideo(src);" +
                 "            } else {" +
-                "              alert('Video link not found directly. Try playing the video first.');" +
+                "              alert('Direct link not found. Try playing the video.');" +
                 "            }" +
                 "          };" +
                 "          container.appendChild(btn);" +
                 "        }" +
                 "      }" +
                 "    });" +
-                "  }, 1000);" +
+                "  }, 1200);" +
                 "})();";
         view.evaluateJavascript(jsCode, null);
     }
@@ -247,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
             request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
             request.setTitle("Downloading Video");
-            request.setDescription("Downloading file from All Video Downloader");
+            request.setDescription("Downloading file from Video Downloader App");
             request.allowScanningByMediaScanner();
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Video_" + System.currentTimeMillis() + ".mp4");
