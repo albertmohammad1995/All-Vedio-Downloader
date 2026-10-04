@@ -11,9 +11,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText etSearch;
     private WebView webView;
-    private LinearLayout btnFacebook, btnInstagram, btnYoutube, btnX;
+    private Button btnFacebook, btnInstagram, btnYoutube, btnX;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
         btnYoutube = findViewById(R.id.btnYoutube);
         btnX = findViewById(R.id.btnX);
 
-        // WebView Advanced Settings for Real Browsing Experience & Login Support
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
@@ -43,11 +41,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
-        webSettings.setSupportZoom(true);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
 
-        // Enable Cookie management so login sessions are saved
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
@@ -61,11 +55,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         webView.setWebChromeClient(new WebChromeClient());
-
-        // Default open Google
         webView.loadUrl("https://www.google.com");
 
-        // Search Bar Action
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 String query = etSearch.getText().toString().trim();
@@ -83,17 +74,13 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // Exact 4 Platform Click Listeners in Order
         btnFacebook.setOnClickListener(v -> webView.loadUrl("https://www.facebook.com"));
         btnInstagram.setOnClickListener(v -> webView.loadUrl("https://www.instagram.com"));
         btnYoutube.setOnClickListener(v -> webView.loadUrl("https://www.youtube.com"));
         btnX.setOnClickListener(v -> webView.loadUrl("https://twitter.com"));
 
-        // Video Download Interceptor / Trigger
         webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
             Toast.makeText(MainActivity.this, "Preparing download...", Toast.LENGTH_SHORT).show();
-            
-            // Open video download link in external browser or internal downloader pipeline
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(url));
             startActivity(intent);
