@@ -1,114 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FAF3EE"
-    android:padding="8dp">
+    android:layout_height="match_parent">
 
-    <!-- App Title -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="All Video Downloader"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#2196F3"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="8dp"/>
-
-    <!-- Top Search Bar / URL Input -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:background="#FFFFFF"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="12dp"
-        android:elevation="2dp"
-        android:layout_marginBottom="8dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#FAF3EE"
+        android:padding="8dp">
 
-        <EditText
-            android:id="@+id/etSearch"
+        <!-- App Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="All Video Downloader"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#2196F3"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Top Search Bar / URL Input -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:hint="Search Google or type URL"
-            android:inputType="textUri"
-            android:imeOptions="actionSearch"
-            android:textSize="14sp"
-            android:textColor="#000000"/>
+            android:layout_height="45dp"
+            android:background="#FFFFFF"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp"
+            android:elevation="2dp"
+            android:layout_marginBottom="8dp">
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:hint="Search Google or type URL"
+                android:inputType="textUri"
+                android:imeOptions="actionSearch"
+                android:textSize="14sp"
+                android:textColor="#000000"/>
+        </LinearLayout>
+
+        <!-- Platform Shortcuts Layout (4 Buttons with Smooth Icons) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="4"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btnFacebook"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="3dp"
+                android:text="Facebook"
+                android:textSize="9sp"
+                android:backgroundTint="#1877F2"
+                android:textColor="#FFFFFF"
+                android:drawableTop="@drawable/ic_facebook"
+                android:drawablePadding="2dp"
+                android:paddingTop="6dp"/>
+
+            <Button
+                android:id="@+id/btnInstagram"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="3dp"
+                android:text="Instagram"
+                android:textSize="9sp"
+                android:backgroundTint="#E4405F"
+                android:textColor="#FFFFFF"
+                android:drawableTop="@drawable/ic_instagram"
+                android:drawablePadding="2dp"
+                android:paddingTop="6dp"/>
+
+            <Button
+                android:id="@+id/btnYoutube"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="3dp"
+                android:text="YouTube"
+                android:textSize="9sp"
+                android:backgroundTint="#FF0000"
+                android:textColor="#FFFFFF"
+                android:drawableTop="@drawable/ic_youtube"
+                android:drawablePadding="2dp"
+                android:paddingTop="6dp"/>
+
+            <Button
+                android:id="@+id/btnX"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:text="X"
+                android:textSize="9sp"
+                android:backgroundTint="#000000"
+                android:textColor="#FFFFFF"
+                android:drawableTop="@drawable/ic_x"
+                android:drawablePadding="2dp"
+                android:paddingTop="6dp"/>
+
+        </LinearLayout>
+
+        <!-- WebView taking the remaining Full Screen space -->
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#FFFFFF"/>
+
     </LinearLayout>
 
-    <!-- Platform Shortcuts Layout (4 Buttons with Custom Original Icons) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:weightSum="4"
-        android:layout_marginBottom="8dp">
-
-        <Button
-            android:id="@+id/btnFacebook"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="3dp"
-            android:text="Facebook"
-            android:textSize="9sp"
-            android:backgroundTint="#1877F2"
-            android:textColor="#FFFFFF"
-            android:drawableTop="@drawable/ic_facebook"
-            android:paddingTop="4dp"/>
-
-        <Button
-            android:id="@+id/btnInstagram"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="3dp"
-            android:text="Instagram"
-            android:textSize="9sp"
-            android:backgroundTint="#E4405F"
-            android:textColor="#FFFFFF"
-            android:drawableTop="@drawable/ic_instagram"
-            android:paddingTop="4dp"/>
-
-        <Button
-            android:id="@+id/btnYoutube"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="3dp"
-            android:text="YouTube"
-            android:textSize="9sp"
-            android:backgroundTint="#FF0000"
-            android:textColor="#FFFFFF"
-            android:drawableTop="@drawable/ic_youtube"
-            android:paddingTop="4dp"/>
-
-        <Button
-            android:id="@+id/btnX"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_weight="1"
-            android:text="X"
-            android:textSize="9sp"
-            android:backgroundTint="#000000"
-            android:textColor="#FFFFFF"
-            android:drawableTop="@drawable/ic_x"
-            android:paddingTop="4dp"/>
-
-    </LinearLayout>
-
-    <!-- WebView taking the remaining Full Screen space -->
-    <WebView
-        android:id="@+id/webView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#FFFFFF"/>
-
-</LinearLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
