@@ -40,6 +40,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     
+    // সোয়াইপ রিফ্রেশ লেআউটের জন্য এই ডিপেন্ডেন্সিটি যুক্ত করা হলো (যা এরর দূর করবে)
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    
     // Firebase & AdMob Dependencies
     implementation platform('com.google.firebase:firebase-bom:32.7.0')
     implementation 'com.google.firebase:firebase-analytics'
