@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "643623239570",
+    "project_id": "vedio-73082",
+    "storage_bucket": "vedio-73082.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:643623239570:android:41fe643fc6fefd374f4b4b",
+        "android_client_info": {
+          "package_name": "com.downloader.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmKF6ycEy1cVxVMhVh1klvJW2gnknpc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
