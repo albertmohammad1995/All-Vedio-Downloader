@@ -1,162 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FAF3EE"
-    android:padding="16dp">
+<LinearLayout android:background="#FAF3EE" android:layout_height="match_parent" android:layout_width="match_parent" android:orientation="vertical" android:padding="16dp" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- App Title -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="All Video Downloader"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#2196F3"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"/>
+    <TextView android:layout_gravity="center_horizontal" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:layout_marginTop="8dp" android:layout_width="wrap_content" android:text="All Video Downloader" android:textColor="#2196F3" android:textSize="24sp" android:textStyle="bold"/>
 
     <!-- Top Search Bar / URL Input -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@drawable/search_bg"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
-        android:elevation="2dp">
+    <LinearLayout android:background="#FFFFFF" android:elevation="2dp" android:gravity="center_vertical" android:layout_height="50dp" android:layout_width="match_parent" android:orientation="horizontal" android:paddingHorizontal="16dp">
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:ic_menu_search"
-            android:tint="#757575"/>
-
-        <EditText
-            android:id="@+id/etSearch"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@null"
-            android:hint="Search Google or type URL"
-            android:inputType="textUri"
-            android:imeOptions="actionSearch"
-            android:paddingStart="12dp"
-            android:textSize="14sp"
-            android:textColor="#000000"/>
+        <EditText android:background="@null" android:hint="Search Google or type URL" android:id="@+id/etSearch" android:imeOptions="actionSearch" android:inputType="textUri" android:layout_height="match_parent" android:layout_width="match_parent" android:textColor="#000000" android:textSize="14sp"/>
     </LinearLayout>
 
-    <!-- Platform Shortcuts Layout (Exact 4 Icons in Order) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:weightSum="4"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp">
+    <!-- Platform Shortcuts Layout (4 Buttons) -->
+    <LinearLayout android:gravity="center" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:layout_marginTop="16dp" android:layout_width="match_parent" android:orientation="horizontal" android:weightSum="4">
 
-        <!-- Facebook Icon -->
-        <LinearLayout
-            android:id="@+id/btnFacebook"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/icon_bg"
-            android:layout_marginEnd="8dp">
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_facebook" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Facebook"
-                android:textSize="11sp"
-                android:textColor="#333333"
-                android:layout_marginTop="4dp"/>
-        </LinearLayout>
+        <Button android:id="@+id/btnFacebook" android:layout_height="50dp" android:layout_marginEnd="4dp" android:layout_weight="1" android:layout_width="0dp" android:text="Facebook" android:textSize="11sp"/>
 
-        <!-- Instagram Icon -->
-        <LinearLayout
-            android:id="@+id/btnInstagram"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/icon_bg"
-            android:layout_marginEnd="8dp">
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_instagram" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Instagram"
-                android:textSize="11sp"
-                android:textColor="#333333"
-                android:layout_marginTop="4dp"/>
-        </LinearLayout>
+        <Button android:id="@+id/btnInstagram" android:layout_height="50dp" android:layout_marginEnd="4dp" android:layout_weight="1" android:layout_width="0dp" android:text="Instagram" android:textSize="11sp"/>
 
-        <!-- YouTube Icon -->
-        <LinearLayout
-            android:id="@+id/btnYoutube"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/icon_bg"
-            android:layout_marginEnd="8dp">
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_youtube" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="YouTube"
-                android:textSize="11sp"
-                android:textColor="#333333"
-                android:layout_marginTop="4dp"/>
-        </LinearLayout>
+        <Button android:id="@+id/btnYoutube" android:layout_height="50dp" android:layout_marginEnd="4dp" android:layout_weight="1" android:layout_width="0dp" android:text="YouTube" android:textSize="11sp"/>
 
-        <!-- X / Twitter Icon -->
-        <LinearLayout
-            android:id="@+id/btnX"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/icon_bg">
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_x" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="X / Twitter"
-                android:textSize="11sp"
-                android:textColor="#333333"
-                android:layout_marginTop="4dp"/>
-        </LinearLayout>
+        <Button android:id="@+id/btnX" android:layout_height="50dp" android:layout_weight="1" android:layout_width="0dp" android:text="X / Twitter" android:textSize="10sp"/>
 
     </LinearLayout>
 
-    <!-- WebView for Browsing & Video Playback -->
-    <WebView
-        android:id="@+id/webView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#FFFFFF"/>
+    <!-- WebView for Browsing -->
+    <WebView android:background="#FFFFFF" android:id="@+id/webView" android:layout_height="0dp" android:layout_weight="1" android:layout_width="match_parent"/>
 
 </LinearLayout>
