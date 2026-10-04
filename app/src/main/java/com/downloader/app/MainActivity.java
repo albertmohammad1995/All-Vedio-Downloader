@@ -77,6 +77,16 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                // কাস্টম অ্যাপ স্কিম (যেমন fb://) হ্যান্ডেল করার জন্য
+                if (url.startsWith("fb://") || url.startsWith("instagram://") || url.startsWith("whatsapp://")) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
+                        return true;
+                    } catch (Exception e) {
+                        return true;
+                    }
+                }
                 etSearch.setText("");
                 view.loadUrl(url);
                 return true;
@@ -184,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
     private void triggerDownloadFlow(String url) {
         if (url == null || url.isEmpty()) return;
         pendingDownloadUrl = url;
-        Toast.makeText(MainActivity.this, "Please wait, opening ad...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Please wait, preparing download...", Toast.LENGTH_SHORT).show();
 
         if (mInterstitialAd != null) {
             mInterstitialAd.show(MainActivity.this);
@@ -207,38 +217,38 @@ public class MainActivity extends AppCompatActivity {
                 "        if (container) {" +
                 "          container.style.position = 'relative';" +
                 "          var btn = document.createElement('button');" +
-                "          btn.innerHTML = '⬇ Download Video';" +
+                "          btn.innerHTML = '⬇ Download';" +
                 "          btn.style.position = 'absolute';" +
-                "          btn.style.top = '15px';" +
-                "          btn.style.right = '15px';" +
+                "          btn.style.top = '10px';" +
+                "          btn.style.right = '10px';" +
                 "          btn.style.zIndex = '999999';" +
                 "          btn.style.background = '#ff0000';" +
                 "          btn.style.color = '#ffffff';" +
                 "          btn.style.border = '2px solid #fff';" +
-                "          btn.style.padding = '8px 12px';" +
-                "          btn.style.borderRadius = '8px';" +
-                "          btn.style.fontSize = '13px';" +
+                "          btn.style.padding = '6px 10px';" +
+                "          btn.style.borderRadius = '6px';" +
+                "          btn.style.fontSize = '12px';" +
                 "          btn.style.fontWeight = 'bold';" +
-                "          btn.style.boxShadow = '0px 4px 10px rgba(0,0,0,0.5)';" +
                 "          btn.style.cursor = 'pointer';" +
                 "          btn.onclick = function(e) {" +
                 "            e.stopPropagation();" +
                 "            var src = video.src || (video.querySelector('source') ? video.querySelector('source').src : '');" +
                 "            if(!src) {" +
-                "               var sourceTag = video.closest('div').querySelector('source');" +
+                "               var sourceTag = video.closest('div') ? video.closest('div').querySelector('source') : null;" +
                 "               if(sourceTag) src = sourceTag.src;" +
                 "            }" +
-                "            if(src) {" +
+                "            if(src && !src.startsWith('blob:')) {" +
                 "              AndroidDownloader.downloadVideo(src);" +
                 "            } else {" +
-                "              alert('Direct link not found. Try playing the video.');" +
+                "              var currentUrl = window.location.href;" +
+                "              AndroidDownloader.downloadVideo(currentUrl);" +
                 "            }" +
                 "          };" +
                 "          container.appendChild(btn);" +
                 "        }" +
                 "      }" +
                 "    });" +
-                "  }, 1200);" +
+                "  }, 1000);" +
                 "})();";
         view.evaluateJavascript(jsCode, null);
     }
