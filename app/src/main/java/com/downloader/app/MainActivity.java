@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
             etSearch.clearFocus();
         });
         btnX.setOnClickListener(v -> {
-            webView.loadUrl("https://twitter.com");
+            webView.loadUrl("https://x.com"); // টুইটার/এক্স এর নতুন ডোমেইন আপডেট করা হয়েছে
             etSearch.setText("");
             etSearch.clearFocus();
         });
