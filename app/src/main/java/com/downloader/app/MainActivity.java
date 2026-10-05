@@ -1,4 +1,3 @@
-// app/java/com/downloader/app/MainActivity.java
 package com.downloader.app;
 
 import android.app.DownloadManager;
@@ -98,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 etSearch.setText("");
 
                 // ফেসবুকের অ্যাপ ডাউনলোড ব্যানার বা প্রমোশন হাইড করার জন্য জেএস ইনজেকশন
-                if (url.contains("facebook.com")) {
+                if (url != null && url.contains("facebook.com")) {
                     String hideBannerJs = "javascript:(function() {" +
                         "  var banner = document.querySelector('div[data-sigil=\"MAppBanner\"]') || document.querySelector('div._526g');" +
                         "  if(banner) { banner.style.display = 'none'; }" +
@@ -107,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // ডাউনলোডার সাইটগুলোতে গেলে অটোমেটিক বাটন ক্লিক করানোর জাভাস্ক্রিপ্ট ইনজেকশন
-                if (url.contains("fdown.net") || url.contains("loader.to")) {
+                if (url != null && (url.contains("fdown.net") || url.contains("loader.to"))) {
                     String autoClickJs = "javascript:(function() {" +
                         "  var downloadBtn = document.querySelector('button#submit') || document.querySelector('a.download-btn');" +
                         "  if(downloadBtn) { downloadBtn.click(); }" +
@@ -208,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // প্রথমে অ্যাড শো করবে, অ্যাড শেষ বা ক্লোজ হলে ডাউনলোড শুরু হবে
     private void triggerDownloadFlow(String url) {
         if (url == null || url.isEmpty()) return;
         pendingDownloadUrl = url;
