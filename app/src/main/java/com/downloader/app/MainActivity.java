@@ -97,6 +97,15 @@ public class MainActivity extends AppCompatActivity {
                 }
                 etSearch.setText("");
 
+                // ফেসবুকের অ্যাপ ডাউনলোড ব্যানার বা প্রমোশন হাইড করার জন্য জেএস ইনজেকশন
+                if (url.contains("facebook.com")) {
+                    String hideBannerJs = "javascript:(function() {" +
+                        "  var banner = document.querySelector('div[data-sigil=\"MAppBanner\"]') || document.querySelector('div._526g');" +
+                        "  if(banner) { banner.style.display = 'none'; }" +
+                        "})();";
+                    view.evaluateJavascript(hideBannerJs, null);
+                }
+
                 // ডাউনলোডার সাইটগুলোতে গেলে অটোমেটিক বাটন ক্লিক করানোর জাভাস্ক্রিপ্ট ইনজেকশন
                 if (url.contains("fdown.net") || url.contains("loader.to")) {
                     String autoClickJs = "javascript:(function() {" +
@@ -180,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             etSearch.clearFocus();
         });
         btnX.setOnClickListener(v -> {
-            webView.loadUrl("https://x.com"); // টুইটার/এক্স এর নতুন ডোমেইন আপডেট করা হয়েছে
+            webView.loadUrl("https://x.com");
             etSearch.setText("");
             etSearch.clearFocus();
         });
