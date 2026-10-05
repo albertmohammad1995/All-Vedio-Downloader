@@ -13,7 +13,7 @@ import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
+import android.widget.ImageButton; // ImageButton import করা হয়েছে
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private InterstitialAd mInterstitialAd;
     private String pendingDownloadUrl = "";
     
-    // আপনার দেওয়া নির্দিষ্ট অ্যাডমব আইডি
+    // আপনার নির্দিষ্ট অ্যাডমব আইডি
     private static final String AD_UNIT_ID = "ca-app-pub-3649023459134036/7790678843";
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -66,10 +66,11 @@ public class MainActivity extends AppCompatActivity {
         etSearch = findViewById(R.id.etSearch);
         webView = findViewById(R.id.webView);
 
-        Button btnFacebook = findViewById(R.id.btnFacebook);
-        Button btnInstagram = findViewById(R.id.btnInstagram);
-        Button btnYoutube = findViewById(R.id.btnYoutube);
-        Button btnX = findViewById(R.id.btnX);
+        // লেআউটের সাথে সামঞ্জস্য রেখে ImageButton করা হয়েছে
+        ImageButton btnFacebook = findViewById(R.id.btnFacebook);
+        ImageButton btnInstagram = findViewById(R.id.btnInstagram);
+        ImageButton btnYoutube = findViewById(R.id.btnYoutube);
+        ImageButton btnX = findViewById(R.id.btnX);
 
         // WebView সেটিংস
         WebSettings webSettings = webView.getSettings();
@@ -131,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         btnFacebook.setOnClickListener(v -> webView.loadUrl("https://www.facebook.com"));
         btnInstagram.setOnClickListener(v -> webView.loadUrl("https://www.instagram.com"));
         btnYoutube.setOnClickListener(v -> webView.loadUrl("https://www.youtube.com"));
-        btnX.setOnClickListener(v -> webView.loadUrl("https://twitter.com"));
+        btnX.setOnClickListener(v -> webView.loadUrl("https://x.com"));
     }
 
     // অ্যাডমব অ্যাড লোড করার ফাংশন
@@ -216,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                 if (finalLink != null && !finalLink.isEmpty()) {
                     startDownloadManager(finalLink);
                 } else {
-                    Toast.makeText(MainActivity.this, "ডাইরেক্ট ডাউনলোড লিংক পাওয়া যায়নি!", Toast.LENGTH_SHORT).show();
+                    Toast.npmToast(MainActivity.this, "ডাইরেক্ট ডাউনলোড লিংক পাওয়া যায়নি!", Toast.LENGTH_SHORT); // Safe fallback
                 }
             });
         });
