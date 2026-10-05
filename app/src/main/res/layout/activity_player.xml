@@ -4,14 +4,14 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- ভিডিও প্লেয়ারের জন্য ফুল স্ক্রিন WebView -->
+    <!-- WebView for video playback -->
     <WebView
         android:id="@+id/playerWebView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottomBar"/>
+        android:layout_above="@id/bottomBar" />
 
-    <!-- নিচে ফ্লোটিং বা ফিক্সড ডাউনলোড বার/বাটন -->
+    <!-- Bottom Action Bar -->
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
@@ -26,11 +26,11 @@
             android:id="@+id/btnDownload"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⬇ Download Video"
+            android:text="Download Video"
             android:textSize="16sp"
             android:textStyle="bold"
             android:backgroundTint="#4CAF50"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 
