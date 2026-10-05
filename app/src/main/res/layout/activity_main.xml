@@ -1,136 +1,73 @@
-package com.downloader.app
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipeRefreshLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-import android.os.Bundle
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-class MainActivity : AppCompatActivity() {
+        <!-- সার্চবার এবং শর্টকাট বাটন -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
 
-    private lateinit var webView: WebView
-    private lateinit var etSearch: EditText
-    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="সার্চ বা ইউআরএল লিখুন..."
+                android:inputType="textUri"
+                android:imeOptions="actionGo"
+                android:maxLines="1"/>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="4dp">
 
-        // লেআউট থেকে আইডিগুলো কানেক্ট করা
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
-        etSearch = findViewById(R.id.etSearch)
-        webView = findViewById(R.id.webView)
+                <Button
+                    android:id="@+id/btnFacebook"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Facebook"/>
 
-        val btnFacebook = findViewById<Button>(R.id.btnFacebook)
-        val btnInstagram = findViewById<Button>(R.id.btnInstagram)
-        val btnYoutube = findViewById<Button>(R.id.btnYoutube)
-        val btnX = findViewById<Button>(R.id.btnX)
+                <Button
+                    android:id="@+id/btnInstagram"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Instagram"/>
 
-        // WebView সেটিংস
-        webView.settings.javaScriptEnabled = true
-        webView.settings.domStorageEnabled = true
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                swipeRefreshLayout.isRefreshing = false
-                if (url != null) {
-                    etSearch.setText(url) // পেজ চেঞ্জ হলে সার্চবারে লিংক আপডেট হবে
-                }
-            }
-        }
+                <Button
+                    android:id="@+id/btnYoutube"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="YouTube"/>
 
-        // প্রথমে ডিফল্টভাবে গুগল বা হোমপেজ লোড করতে পারেন অথবা ফেসবুক/ইউটিউব
-        webView.loadUrl("https://www.google.com")
+                <Button
+                    android:id="@+id/btnX"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="X"/>
+            </LinearLayout>
+        </LinearLayout>
 
-        // Swipe to Refresh হ্যান্ডেল করা
-        swipeRefreshLayout.setOnRefreshListener {
-            webView.reload()
-        }
+        <!-- WebView -->
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
-        // সার্চবার বা ইনপুটে কেউ লিংক লিখে সার্চ বা এন্টার দিলে WebView-তে লোড হবে এবং সার্ভারেও পাঠানো যাবে
-        etSearch.setOnEditorActionListener { v, _, _ ->
-            val query = v.text.toString().trim()
-            if (query.isNotEmpty()) {
-                val finalUrl = if (query.startsWith("http://") || query.startsWith("https://")) {
-                    query
-                } else {
-                    "https://www.google.com/search?q=$query"
-                }
-                webView.loadUrl(finalUrl)
-
-                // যদি ইউজার সরাসরি কোনো ভিডিওর লিংক দিয়ে থাকে, তবে ব্যাকগ্রাউন্ডে আমাদের টার্মাক্স সার্ভারে পাঠিয়ে ডাইরেক্ট লিংক চেক করতে পারি
-                checkAndFetchVideo(query)
-            }
-            true
-        }
-
-        // প্ল্যাটফর্ম শর্টকাট বাটনগুলোর কাজ
-        btnFacebook.setOnClickListener {
-            webView.loadUrl("https://www.facebook.com")
-        }
-        btnInstagram.setOnClickListener {
-            webView.loadUrl("https://www.instagram.com")
-        }
-        btnYoutube.setOnClickListener {
-            webView.loadUrl("https://www.youtube.com")
-        }
-        btnX.setOnClickListener {
-            webView.loadUrl("https://twitter.com")
-        }
-    }
-
-    // টার্মাক্স লোকাল সার্ভারে ভিডিও লিংক পাঠিয়ে ডাইরেক্ট ডাউনলোড লিংক বের করার ফাংশন
-    private fun checkAndFetchVideo(videoUrl: String) {
-        if (videoUrl.contains("youtube.com") || videoUrl.contains("youtu.be") || videoUrl.contains("facebook.com") || videoUrl.contains("fb.watch")) {
-            Toast.makeText(this, "টার্মাক্স সার্ভার থেকে ভিডিও প্রসেস হচ্ছে...", Toast.LENGTH_SHORT).show()
-
-            lifecycleScope.launch {
-                val downloadLink = fetchLinkFromServer(videoUrl)
-                if (downloadLink != null) {
-                    Toast.makeText(this@MainActivity, "ডাইরেক্ট লিংক পাওয়া গেছে!", Toast.LENGTH_LONG).show()
-                    // এখানে আপনার পাওয়া `download_link` দিয়ে অ্যান্ড্রয়েডের DownloadManager বা অন্য কোনো ডাউনলোডার দিয়ে ডাউনলোড শুরু করতে পারবেন।
-                } else {
-                    // লিংক সরাসরি ভিডিওর না হলে বা সার্ভার থেকে না পেলে সাইলেন্ট থাকবে অথবা ব্রাউজ হতে থাকবে
-                }
-            }
-        }
-    }
-
-    private suspend fun fetchLinkFromServer(videoUrl: String): String? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val encodedUrl = URLEncoder.encode(videoUrl, "UTF-8")
-                val targetUrl = "http://127.0.0.1:5000/get_video?url=$encodedUrl"
-                
-                val url = URL(targetUrl)
-                val connection = url.openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.connectTimeout = 10000
-                connection.readTimeout = 10000
-
-                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                    val responseString = connection.inputStream.bufferedReader().use { it.readText() }
-                    val jsonObject = JSONObject(responseString)
-                    
-                    if (jsonObject.optBoolean("success", false)) {
-                        return@withContext jsonObject.optString("download_url")
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            return@withContext null
-        }
-    }
-}
+    </LinearLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
