@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- সার্চবার এবং শর্টকাট বাটন -->
+        <!-- Search bar and shortcut buttons container -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,49 +21,63 @@
                 android:id="@+id/etSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="সার্চ বা ইউআরএল লিখুন..."
+                android:hint="Type search or URL..."
                 android:inputType="textUri"
                 android:imeOptions="actionGo"
                 android:maxLines="1"/>
 
+            <!-- Shortcut icon buttons using ImageButton to prevent text wrapping issues -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="4dp"
+                android:weightSum="4">
 
-                <Button
+                <ImageButton
                     android:id="@+id/btnFacebook"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="45dp"
                     android:layout_weight="1"
-                    android:text="Facebook"/>
+                    android:background="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_facebook"
+                    android:scaleType="centerInside"
+                    android:contentDescription="Facebook"/>
 
-                <Button
+                <ImageButton
                     android:id="@+id/btnInstagram"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="45dp"
                     android:layout_weight="1"
-                    android:text="Instagram"/>
+                    android:background="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_instagram"
+                    android:scaleType="centerInside"
+                    android:contentDescription="Instagram"/>
 
-                <Button
+                <ImageButton
                     android:id="@+id/btnYoutube"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="45dp"
                     android:layout_weight="1"
-                    android:text="YouTube"/>
+                    android:background="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_youtube"
+                    android:scaleType="centerInside"
+                    android:contentDescription="YouTube"/>
 
-                <Button
+                <ImageButton
                     android:id="@+id/btnX"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="45dp"
                     android:layout_weight="1"
-                    android:text="X"/>
+                    android:background="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_x"
+                    android:scaleType="centerInside"
+                    android:contentDescription="X"/>
             </LinearLayout>
         </LinearLayout>
 
-        <!-- WebView -->
+        <!-- WebView for browsing -->
         <WebView
             android:id="@+id/webView"
             android:layout_width="match_parent"
