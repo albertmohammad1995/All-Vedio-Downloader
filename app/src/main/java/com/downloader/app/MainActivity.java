@@ -13,8 +13,8 @@ import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ImageButton; // ImageButton import করা হয়েছে
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
     private InterstitialAd mInterstitialAd;
     private String pendingDownloadUrl = "";
     
-    // আপনার নির্দিষ্ট অ্যাডমব আইডি
     private static final String AD_UNIT_ID = "ca-app-pub-3649023459134036/7790678843";
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -59,20 +58,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // AdMob ইনিশিয়ালাইজেশন
         MobileAds.initialize(this, initializationStatus -> loadAdMobAd());
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         etSearch = findViewById(R.id.etSearch);
         webView = findViewById(R.id.webView);
 
-        // লেআউটের সাথে সামঞ্জস্য রেখে ImageButton করা হয়েছে
         ImageButton btnFacebook = findViewById(R.id.btnFacebook);
         ImageButton btnInstagram = findViewById(R.id.btnInstagram);
         ImageButton btnYoutube = findViewById(R.id.btnYoutube);
         ImageButton btnX = findViewById(R.id.btnX);
 
-        // WebView সেটিংস
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
@@ -98,9 +94,6 @@ public class MainActivity extends AppCompatActivity {
                 if (swipeRefreshLayout != null) {
                     swipeRefreshLayout.setRefreshing(false);
                 }
-                if (url != null) {
-                    etSearch.setText(url);
-                }
             }
         });
 
@@ -108,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
 
         swipeRefreshLayout.setOnRefreshListener(() -> webView.reload());
 
-        // সার্চবার বা ইনপুটে লিংক লিখে সার্চ করলে অ্যাড শো করবে এবং প্রসেস হবে
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             String query = etSearch.getText().toString().trim();
             if (!query.isEmpty()) {
@@ -121,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 webView.loadUrl(finalUrl);
 
-                // ভিডিও লিংক হলে অ্যাড ফ্লো ট্রিগার করা
                 if (query.contains("youtube.com") || query.contains("youtu.be") || query.contains("facebook.com") || query.contains("fb.watch")) {
                     triggerDownloadFlow(query);
                 }
@@ -135,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
         btnX.setOnClickListener(v -> webView.loadUrl("https://x.com"));
     }
 
-    // অ্যাডমব অ্যাড লোড করার ফাংশন
     private void loadAdMobAd() {
         AdRequest adRequest = new AdRequest.Builder().build();
         InterstitialAd.load(this, AD_UNIT_ID, adRequest, new InterstitialAdLoadCallback() {
@@ -163,11 +153,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // অ্যাড দেখানোর ট্রিগার ফ্লো
     private void triggerDownloadFlow(String url) {
         if (url == null || url.isEmpty()) return;
         pendingDownloadUrl = url;
-        Toast.makeText(this, "প্রিপারিং ডাউনলোড...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Preparing download...", Toast.LENGTH_SHORT).show();
 
         if (mInterstitialAd != null) {
             mInterstitialAd.show(MainActivity.this);
@@ -177,10 +166,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ব্যাকগ্রাউন্ডে টার্মাক্স সার্ভার থেকে লিংক ফেচ করা
     private void executeProcessAndDownload(String videoUrl) {
         if (videoUrl == null || videoUrl.isEmpty()) return;
-        Toast.makeText(this, "টার্মাক্স সার্ভার থেকে ভিডিও প্রসেস হচ্ছে...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Processing video from Termux server...", Toast.LENGTH_SHORT).show();
 
         executorService.execute(() -> {
             String downloadLink = null;
@@ -217,13 +205,12 @@ public class MainActivity extends AppCompatActivity {
                 if (finalLink != null && !finalLink.isEmpty()) {
                     startDownloadManager(finalLink);
                 } else {
-                    Toast.npmToast(MainActivity.this, "ডাইরেক্ট ডাউনলোড লিংক পাওয়া যায়নি!", Toast.LENGTH_SHORT); // Safe fallback
+                    Toast.makeText(MainActivity.this, "Direct download link not found!", Toast.LENGTH_SHORT).show();
                 }
             });
         });
     }
 
-    // অ্যান্ড্রয়েডের নিজস্ব DownloadManager দিয়ে ফাইল নামিয়ে নেওয়া
     private void startDownloadManager(String url) {
         try {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
@@ -237,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
             DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
             if (manager != null) {
                 manager.enqueue(request);
-                Toast.makeText(this, "ডাউনলোড সফলভাবে শুরু হয়েছে!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Download started successfully!", Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
