@@ -88,10 +88,6 @@ public class MainActivity extends AppCompatActivity {
                 String url = request.getUrl().toString();
                 if (url.startsWith("http://") || url.startsWith("https://")) {
                     view.loadUrl(url);
-                    if (isTargetVideoUrl(url)) {
-                        etSearch.setText(url);
-                        triggerDownloadFlow(url);
-                    }
                     return true;
                 }
                 return true;
@@ -102,11 +98,6 @@ public class MainActivity extends AppCompatActivity {
                 super.onPageFinished(view, url);
                 if (swipeRefreshLayout != null) {
                     swipeRefreshLayout.setRefreshing(false);
-                }
-                if (url != null && isTargetVideoUrl(url)) {
-                    if (!url.equals(etSearch.getText().toString())) {
-                        etSearch.setText(url);
-                    }
                 }
             }
         });
@@ -192,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void executeProcessAndDownload(String videoUrl) {
         if (videoUrl == null || videoUrl.isEmpty()) return;
-        Toast.makeText(this, "Processing video from Termux server...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Processing video from server...", Toast.LENGTH_SHORT).show();
 
         executorService.execute(() -> {
             String downloadLink = null;
