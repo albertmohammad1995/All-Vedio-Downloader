@@ -82,110 +82,12 @@ public class MainActivity extends AppCompatActivity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        // WebViewClient আপডেট করা হয়েছে যাতে কাস্টম স্কিম (fb:// বা অ্যাপ লিংক) ক্র্যাশ না করে এবং ভিডিও লিংক ধরলে ডাউনলোড ট্রিগার হয়
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                return handleUrlLoading(view, url);
-            }
-
-            @Overrideআপনার দেওয়া কোডটি একদম নিখুঁত আছে এবং এতে অ্যাডমোব, ওয়েবভিউ এবং থ্রেড হ্যান্ডলিং সুন্দরভাবে সাজানো আছে। মূলত সমস্যাটি হচ্ছে—যখন আপনি ওয়েবভিউ-এর ভেতরে ব্রাউজ করে কোনো ভিডিওর পেজে যান, তখন শুধু সার্চবারের এডিটটেক থেকে লিংক চেক করায় ব্যাকএন্ডে রিকোয়েস্ট যায় না। এছাড়া ফেসবুক বা অন্যান্য সাইটের নিজস্ব নেটিভ অ্যাপ স্কিমগুলো (যেমন `fb://` বা কাস্টম প্রোটোকল) ওয়েবভিউতে ক্র্যাশ বা লোড ফেইল করতে পারে।
-
-আপনার আগের সব ফিচার, ডিজাইন এবং অ্যাডমব ইন্টিগ্রেশন হুবহু অক্ষত রেখে শুধু ওয়েবভিউ থেকে সরাসরি ভিডিও পেজ ডিটেক্ট করা এবং কাস্টম স্কিম হ্যান্ডেল করার লজিকসহ আপডেট করা সম্পূর্ণ `MainActivity.java` ফাইলটি নিচে দেওয়া হলো:
-
-```java
-package com.downloader.app;
-
-import android.app.DownloadManager;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.inputmethod.EditorInfo;
-import android.webkit.CookieManager;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-public class MainActivity extends AppCompatActivity {
-
-    private WebView webView;
-    private EditText etSearch;
-    private SwipeRefreshLayout swipeRefreshLayout;
-
-    private InterstitialAd mInterstitialAd;
-    private String pendingDownloadUrl = "";
-    
-    private static final String AD_UNIT_ID = "ca-app-pub-3649023459134036/7790678843";
-
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        MobileAds.initialize(this, initializationStatus -> loadAdMobAd());
-
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
-        etSearch = findViewById(R.id.etSearch);
-        webView = findViewById(R.id.webView);
-
-        ImageButton btnFacebook = findViewById(R.id.btnFacebook);
-        ImageButton btnInstagram = findViewById(R.id.btnInstagram);
-        ImageButton btnYoutube = findViewById(R.id.btnYoutube);
-        ImageButton btnX = findViewById(R.id.btnX);
-
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setDatabaseEnabled(true);
-        webSettings.setLoadsImagesAutomatically(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setLoadWithOverviewMode(true);
-        webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-
-        CookieManager.getInstance().setAcceptCookie(true);
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
-
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // কাস্টম স্কিম (যেমন fb://) ক্র্যাশ রোধ করতে এবং শুধু http/https এলাউ করতে
-                if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
+                if (url.startsWith("http://") || url.startsWith("https://")) {
                     view.loadUrl(url);
-                    
-                    // ওয়েবভিউতে ব্রাউজ করার সময় যদি সরাসরি কোনো ভিডিও লিংক বা পেজ ওপেন হয়, তা স্বয়ংক্রিয়ভাবে ডিটেক্ট করবে
                     if (isTargetVideoUrl(url)) {
                         etSearch.setText(url);
                         triggerDownloadFlow(url);
@@ -201,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
                 if (swipeRefreshLayout != null) {
                     swipeRefreshLayout.setRefreshing(false);
                 }
-                // পেজ লোড শেষ হলেও কারেন্ট ইউআরএল চেক করে ডাউনলোড ট্রিগার করতে পারে
                 if (url != null && isTargetVideoUrl(url)) {
                     if (!url.equals(etSearch.getText().toString())) {
                         etSearch.setText(url);
@@ -210,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        webView.loadUrl("[https://www.facebook.com](https://www.facebook.com)");
+        webView.loadUrl("https://www.facebook.com");
 
         swipeRefreshLayout.setOnRefreshListener(() -> webView.reload());
 
@@ -222,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 if (query.startsWith("http://") || query.startsWith("https://")) {
                     finalUrl = query;
                 } else {
-                    finalUrl = "[https://www.google.com/search?q=](https://www.google.com/search?q=)" + query;
+                    finalUrl = "https://www.google.com/search?q=" + query;
                 }
                 webView.loadUrl(finalUrl);
 
@@ -233,13 +134,12 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        btnFacebook.setOnClickListener(v -> webView.loadUrl("[https://www.facebook.com](https://www.facebook.com)"));
-        btnInstagram.setOnClickListener(v -> webView.loadUrl("[https://www.instagram.com](https://www.instagram.com)"));
-        btnYoutube.setOnClickListener(v -> webView.loadUrl("[https://www.youtube.com](https://www.youtube.com)"));
-        btnX.setOnClickListener(v -> webView.loadUrl("[https://x.com](https://x.com)"));
+        btnFacebook.setOnClickListener(v -> webView.loadUrl("https://www.facebook.com"));
+        btnInstagram.setOnClickListener(v -> webView.loadUrl("https://www.instagram.com"));
+        btnYoutube.setOnClickListener(v -> webView.loadUrl("https://www.youtube.com"));
+        btnX.setOnClickListener(v -> webView.loadUrl("https://x.com"));
     }
 
-    // ভিডিও লিংক ফিল্টার করার মেথড
     private boolean isTargetVideoUrl(String url) {
         if (url == null) return false;
         return url.contains("youtube.com") || 
@@ -283,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Preparing download...", Toast.LENGTH_SHORT).show();
 
         if (mInterstitialAd != null) {
-            mInterstitial`Ad.show(MainActivity.this);
+            mInterstitialAd.show(MainActivity.this);
         } else {
             executeProcessAndDownload(pendingDownloadUrl);
             loadAdMobAd();
@@ -298,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
             String downloadLink = null;
             try {
                 String encodedUrl = URLEncoder.encode(videoUrl, "UTF-8");
-                String targetUrl = "[http://127.0.0.1:5000/get_video?url=](http://127.0.0.1:5000/get_video?url=)" + encodedUrl;
+                String targetUrl = "http://127.0.0.1:5000/get_video?url=" + encodedUrl;
                 
                 URL url = new URL(targetUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -334,6 +234,8 @@ public class MainActivity extends AppCompatActivity {
             });
         });
     }
+
+    private voidster startDownloadManager(String url) {} // Keep helper if needed or use below
 
     private void startDownloadManager(String url) {
         try {
