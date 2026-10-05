@@ -235,8 +235,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private voidster startDownloadManager(String url) {} // Keep helper if needed or use below
-
     private void startDownloadManager(String url) {
         try {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
