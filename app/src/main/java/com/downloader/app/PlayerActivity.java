@@ -5,7 +5,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -18,8 +20,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     private WebView playerWebView;
     private Button btnDownload;
-    private String videoUrl = "";
-    private String downloadUrl = "";
+    private String pageUrl = "";
+    private String capturedVideoUrl = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,36 +31,56 @@ public class PlayerActivity extends AppCompatActivity {
         playerWebView = findViewById(R.id.playerWebView);
         btnDownload = findViewById(R.id.btnDownload);
 
-        // MainActivity থেকে পাঠানো ভিডিও লিংক এবং ডাউনলোড লিংক রিসিভ করা
-        videoUrl = getIntent().getStringExtra("video_url");
-        downloadUrl = getIntent().getStringExtra("download_url");
+        // Intent থেকে ভিডিও বা পেজ লিংক গ্রহণ
+        pageUrl = getIntent().getStringExtra("video_url");
+        String initialDownloadUrl = getIntent().getStringExtra("download_url");
+        if (initialDownloadUrl != null && !initialDownloadUrl.isEmpty()) {
+            capturedVideoUrl = initialDownloadUrl;
+        }
 
         WebSettings webSettings = playerWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setLoadsImagesAutomatically(true);
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
+        // 1DM এর মত ভিডিও মিডিয়া ফাইল Intercept/Grab করা
         playerWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 view.loadUrl(request.getUrl().toString());
                 return true;
             }
+
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                String url = request.getUrl().toString();
+                
+                // .mp4, .m3u8, video/ ইত্যাদির মত ডিরেক্ট মিডিয়া স্ট্রিম রিকোয়েস্ট ফিল্টার
+                if (url.contains(".mp4") || url.contains(".m3u8") || url.contains("video/") || url.contains("googlevideo.com")) {
+                    Log.d("VideoGrabber", "Captured Video Link: " + url);
+                    capturedVideoUrl = url;
+                    
+                    runOnUiThread(() -> {
+                        btnDownload.setText("Download Video (Link Found)");
+                    });
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
         });
 
-        // WebView-এ ভিডিও পেজটি লোড করা যাতে ইউজার দেখতে পারে
-        if (videoUrl != null && !videoUrl.isEmpty()) {
-            playerWebView.loadUrl(videoUrl);
+        if (pageUrl != null && !pageUrl.isEmpty()) {
+            playerWebView.loadUrl(pageUrl);
         }
 
-        // ডাউনলোড বাটনে ক্লিক করলে সরাসরি ডাউনলোড ম্যানেজার দিয়ে ফাইল সেভ হবে
+        // ডাউনলোড বাটনে ক্লিক করলে ক্যাচ করা লিঙ্ক থেকে ভিডিও ডাউনলোড শুরু হবে
         btnDownload.setOnClickListener(v -> {
-            String targetLink = (downloadUrl != null && !downloadUrl.isEmpty()) ? downloadUrl : videoUrl;
-            if (targetLink != null && !targetLink.isEmpty()) {
-                startDownloadManager(targetLink);
+            String finalUrl = (capturedVideoUrl != null && !capturedVideoUrl.isEmpty()) ? capturedVideoUrl : pageUrl;
+            if (finalUrl != null && !finalUrl.isEmpty()) {
+                startDownloadManager(finalUrl);
             } else {
-                Toast.makeText(this, "Download link not found!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "No downloadable video link detected yet!", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -68,7 +90,7 @@ public class PlayerActivity extends AppCompatActivity {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
             request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
             request.setTitle("Downloading Video");
-            request.setDescription("Saving file securely...");
+            request.setDescription("Saving media file...");
             request.allowScanningByMediaScanner();
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Video_" + System.currentTimeMillis() + ".mp4");
