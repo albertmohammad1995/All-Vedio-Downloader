@@ -21,7 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import = java.io.InputStreamReader;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -32,7 +32,7 @@ public class PlayerActivity extends AppCompatActivity {
     private String pageUrl = "";
     private String capturedVideoUrl = "";
 
-    // আপনার Vercel লাইভ প্রজেক্টের ডোমেন এখানে বসানো হলো
+    // আপনার Vercel প্রজেক্টের সঠিক ডোমেন লিংক এখানে দেওয়া আছে
     private static final String VERCEL_API_BASE = "https://all-vedio-downloader.vercel.app/api/download?url=";
 
     @Override
