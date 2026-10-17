@@ -228,7 +228,8 @@ public class MainActivity extends AppCompatActivity {
             String downloadLink = null;
             try {
                 String encodedUrl = URLEncoder.encode(videoUrl, "UTF-8");
-                String targetUrl = "https://vedio-downloader.ahsawon1995.workers.dev/get_video?url=" + encodedUrl;
+                // Vercel ব্যাকএন্ড এপিআই লিংক যুক্ত করা হয়েছে
+                String targetUrl = "https://all-vedio-downloaders.vercel.app/api/download?url=" + encodedUrl;
                 
                 URL url = new URL(targetUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
