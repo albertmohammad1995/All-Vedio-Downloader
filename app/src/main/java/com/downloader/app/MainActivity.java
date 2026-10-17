@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             String downloadLink = null;
             try {
                 String encodedUrl = URLEncoder.encode(videoUrl, "UTF-8");
-                String targetUrl = "http://127.0.0.1:5000/get_video?url=" + encodedUrl;
+                String targetUrl = "https://vedio-downloader.ahsawon1995.workers.dev/get_video?url=" + encodedUrl;
                 
                 URL url = new URL(targetUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
