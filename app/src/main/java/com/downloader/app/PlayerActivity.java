@@ -5,6 +5,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -16,12 +18,22 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import = java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class PlayerActivity extends AppCompatActivity {
 
     private WebView playerWebView;
     private Button btnDownload;
     private String pageUrl = "";
     private String capturedVideoUrl = "";
+
+    // আপনার Vercel লাইভ প্রজেক্টের ডোমেন এখানে বসানো হলো
+    private static final String VERCEL_API_BASE = "https://all-vedio-downloader.vercel.app/api/download?url=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +57,7 @@ public class PlayerActivity extends AppCompatActivity {
         webSettings.setMediaPlaybackRequiresUserGesture(false);
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        // 1DM এর মত ভিডিও মিডিয়া ফাইল Intercept/Grab করা
+        // ভিডিও মিডিয়া ফাইল Intercept/Grab করা
         playerWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -58,11 +70,8 @@ public class PlayerActivity extends AppCompatActivity {
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
                 
-                // .mp4, .m3u8, video/ বা googlevideo.com এর মত ডিরেক্ট মিডিয়া স্ট্রিম রিকোয়েস্ট ফিল্টার
                 if (url.contains(".mp4") || url.contains(".m3u8") || url.contains("video/") || url.contains("googlevideo.com")) {
                     Log.d("VideoGrabber", "Captured Video Link: " + url);
-                    
-                    // ইউটিউবের অডিও/ভিডিও আলাদা স্ট্রিম হতে পারে, তাই লং বা ভ্যালিড লিংক নিশ্চিত করা
                     if (url.length() > 50) {
                         capturedVideoUrl = url;
                         runOnUiThread(() -> {
@@ -78,15 +87,64 @@ public class PlayerActivity extends AppCompatActivity {
             playerWebView.loadUrl(pageUrl);
         }
 
-        // ডাউনলোড বাটনে ক্লিক করলে ক্যাচ করা লিঙ্ক থেকে ভিডিও ডাউনলোড শুরু হবে
+        // ডাউনলোড বাটনে ক্লিক করলে Vercel ব্যাকএন্ড এপিআই কাজ করবে
         btnDownload.setOnClickListener(v -> {
-            // যদি ডিরেক্ট ভিডিও লিংক ক্যাচ না হয়ে থাকে, তবে সতর্কবার্তা দেখাবে যাতে ভুল লিংকে ৩১ বাইটের ফাইল না নামে
+            String currentWebUrl = playerWebView.getUrl();
+            
             if (capturedVideoUrl != null && !capturedVideoUrl.isEmpty()) {
                 startDownloadManager(capturedVideoUrl);
+            } else if (currentWebUrl != null && !currentWebUrl.isEmpty()) {
+                Toast.makeText(this, "Fetching direct link from server...", Toast.LENGTH_SHORT).show();
+                fetchDirectLinkFromServer(currentWebUrl);
             } else {
-                Toast.makeText(this, "Please play the video first or wait for the link to grab!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Please play the video first!", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void fetchDirectLinkFromServer(String targetUrl) {
+        new Thread(() -> {
+            try {
+                String apiCallUrl = VERCEL_API_BASE + Uri.encode(targetUrl);
+                URL url = new URL(apiCallUrl);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(15000);
+                conn.setReadTimeout(15000);
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+                reader.close();
+
+                JSONObject jsonObject = new JSONObject(result.toString());
+                boolean success = jsonObject.optBoolean("success", false);
+
+                if (success) {
+                    String directDownloadUrl = jsonObject.optString("download_url");
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        if (directDownloadUrl != null && !directDownloadUrl.isEmpty()) {
+                            startDownloadManager(directDownloadUrl);
+                        } else {
+                            Toast.makeText(this, "Direct link not found in response!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(this, "Failed to extract video stream!", Toast.LENGTH_SHORT).show();
+                    });
+                }
+
+            } catch (Exception e) {
+                Log.e("ApiError", "Error fetching link", e);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    Toast.makeText(this, "Server error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
     }
 
     private void startDownloadManager(String url) {
