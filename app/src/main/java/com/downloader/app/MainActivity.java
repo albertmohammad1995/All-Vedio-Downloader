@@ -3,18 +3,22 @@ package com.downloader.app;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.inputmethod.EditorInfo;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -45,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private EditText etSearch;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private com.google.android.material.floatingactionbutton.FloatingActionButton fabDownload;
 
     private InterstitialAd mInterstitialAd;
     private String pendingDownloadUrl = "";
@@ -70,6 +75,22 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnYoutube = findViewById(R.id.btnYoutube);
         ImageButton btnX = findViewById(R.id.btnX);
 
+        // ব্রাউজ করার সময় স্ক্রিনের নিচে ডান কোণায় ফ্লোটিং ডাউনলোড বাটন তৈরি করা (সার্চ বারে কোনো অটো লিংক বসবে না)
+        fabDownload = new com.google.android.material.floatingactionbutton.FloatingActionButton(this);
+        fabDownload.setImageResource(android.R.drawable.ic_menu_save);
+        fabDownload.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#FF0000")));
+        fabDownload.setVisibility(View.GONE); // শুরুতে লুকিয়ে থাকবে, ভিডিও পেজ আসলে ভেসে উঠবে
+
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.gravity = Gravity.BOTTOM | Gravity.END;
+        params.setMargins(0, 0, 48, 48);
+        
+        ViewGroup rootLayout = findViewById(android.R.id.content);
+        rootLayout.addView(fabDownload, params);
+
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
@@ -86,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
+                checkAndToggleDownloadButton(url);
                 if (url.startsWith("http://") || url.startsWith("https://")) {
                     view.loadUrl(url);
                     return true;
@@ -96,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                checkAndToggleDownloadButton(url);
                 if (swipeRefreshLayout != null) {
                     swipeRefreshLayout.setRefreshing(false);
                 }
@@ -106,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
         swipeRefreshLayout.setOnRefreshListener(() -> webView.reload());
 
+        // সার্চ বারে শুধুমাত্র ব্যবহারকারী যা লিখবে বা পেস্ট করবে সেটাই থাকবে, কোনো অটো ইনজেকশন নেই
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             String query = etSearch.getText().toString().trim();
             if (!query.isEmpty()) {
@@ -117,12 +141,18 @@ public class MainActivity extends AppCompatActivity {
                     finalUrl = "https://www.google.com/search?q=" + query;
                 }
                 webView.loadUrl(finalUrl);
-
-                if (isTargetVideoUrl(query)) {
-                    triggerDownloadFlow(query);
-                }
+                checkAndToggleDownloadButton(finalUrl);
             }
             return true;
+        });
+
+        fabDownload.setOnClickListener(v -> {
+            String currentUrl = webView.getUrl();
+            if (currentUrl != null && isTargetVideoUrl(currentUrl)) {
+                triggerDownloadFlow(currentUrl);
+            } else {
+                Toast.makeText(this, "Please open a video first!", Toast.LENGTH_SHORT).show();
+            }
         });
 
         btnFacebook.setOnClickListener(v -> webView.loadUrl("https://www.facebook.com"));
@@ -131,11 +161,20 @@ public class MainActivity extends AppCompatActivity {
         btnX.setOnClickListener(v -> webView.loadUrl("https://x.com"));
     }
 
+    private void checkAndToggleDownloadButton(String url) {
+        if (isTargetVideoUrl(url)) {
+            pendingDownloadUrl = url;
+            fabDownload.setVisibility(View.VISIBLE); // ভিডিও পেজ পেলে ফ্লোটিং বাটন শো করবে
+        } else {
+            fabDownload.setVisibility(View.GONE);
+        }
+    }
+
     private boolean isTargetVideoUrl(String url) {
         if (url == null) return false;
-        return url.contains("youtube.com") || 
-               url.contains("youtu.be") || 
-               url.contains("facebook.com") || 
+        return url.contains("youtube.com/watch") || 
+               url.contains("youtu.be/") || 
+               url.contains("facebook.com/watch") || 
                url.contains("fb.watch") || 
                url.contains("/videos/") || 
                url.contains("/reel/");
