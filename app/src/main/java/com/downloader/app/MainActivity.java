@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
             String downloadLink = null;
             try {
                 String encodedUrl = URLEncoder.encode(videoUrl, "UTF-8");
-                // Vercel ব্যাকএন্ড এপিআই লিংক যুক্ত করা হয়েছে
+                // আপডেট করা মাল্টি-সোর্স Vercel ব্যাকএন্ড এপিআই লিংক
                 String targetUrl = "https://all-vedio-downloaders.vercel.app/api/download?url=" + encodedUrl;
                 
                 URL url = new URL(targetUrl);
@@ -253,6 +253,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+
+            // ফলব্যাক মেথড: সার্ভার থেকে লিংক না পেলে সরাসরি ভিডিও পেজ লিংক দিয়ে ব্রাউজার বা ডাউনলোডার ট্রাই করা
+            if (downloadLink == null || downloadLink.isEmpty()) {
+                downloadLink = videoUrl; 
             }
 
             final String finalLink = downloadLink;
