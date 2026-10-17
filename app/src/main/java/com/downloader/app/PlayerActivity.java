@@ -49,7 +49,8 @@ public class PlayerActivity extends AppCompatActivity {
         playerWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                view.loadUrl(request.getUrl().toString());
+                String url = request.getUrl().toString();
+                view.loadUrl(url);
                 return true;
             }
 
@@ -57,14 +58,17 @@ public class PlayerActivity extends AppCompatActivity {
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
                 
-                // .mp4, .m3u8, video/ ইত্যাদির মত ডিরেক্ট মিডিয়া স্ট্রিম রিকোয়েস্ট ফিল্টার
+                // .mp4, .m3u8, video/ বা googlevideo.com এর মত ডিরেক্ট মিডিয়া স্ট্রিম রিকোয়েস্ট ফিল্টার
                 if (url.contains(".mp4") || url.contains(".m3u8") || url.contains("video/") || url.contains("googlevideo.com")) {
                     Log.d("VideoGrabber", "Captured Video Link: " + url);
-                    capturedVideoUrl = url;
                     
-                    runOnUiThread(() -> {
-                        btnDownload.setText("Download Video (Link Found)");
-                    });
+                    // ইউটিউবের অডিও/ভিডিও আলাদা স্ট্রিম হতে পারে, তাই লং বা ভ্যালিড লিংক নিশ্চিত করা
+                    if (url.length() > 50) {
+                        capturedVideoUrl = url;
+                        runOnUiThread(() -> {
+                            btnDownload.setText("Download Video (Link Found)");
+                        });
+                    }
                 }
                 return super.shouldInterceptRequest(view, request);
             }
@@ -76,11 +80,11 @@ public class PlayerActivity extends AppCompatActivity {
 
         // ডাউনলোড বাটনে ক্লিক করলে ক্যাচ করা লিঙ্ক থেকে ভিডিও ডাউনলোড শুরু হবে
         btnDownload.setOnClickListener(v -> {
-            String finalUrl = (capturedVideoUrl != null && !capturedVideoUrl.isEmpty()) ? capturedVideoUrl : pageUrl;
-            if (finalUrl != null && !finalUrl.isEmpty()) {
-                startDownloadManager(finalUrl);
+            // যদি ডিরেক্ট ভিডিও লিংক ক্যাচ না হয়ে থাকে, তবে সতর্কবার্তা দেখাবে যাতে ভুল লিংকে ৩১ বাইটের ফাইল না নামে
+            if (capturedVideoUrl != null && !capturedVideoUrl.isEmpty()) {
+                startDownloadManager(capturedVideoUrl);
             } else {
-                Toast.makeText(this, "No downloadable video link detected yet!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please play the video first or wait for the link to grab!", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -90,7 +94,7 @@ public class PlayerActivity extends AppCompatActivity {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
             request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
             request.setTitle("Downloading Video");
-            request.setDescription("Saving media file...");
+            request.setDescription("Saving media file securely...");
             request.allowScanningByMediaScanner();
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Video_" + System.currentTimeMillis() + ".mp4");
