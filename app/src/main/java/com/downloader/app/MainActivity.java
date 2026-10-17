@@ -256,35 +256,12 @@ public class MainActivity extends AppCompatActivity {
 
             final String finalLink = downloadLink;
             mainHandler.post(() -> {
-                if (finalLink != null && !finalLink.isEmpty()) {
-                    startDownloadManager(finalLink);
-                } else {
-                    Toast.makeText(MainActivity.this, "Direct download link not found! Opening in browser...", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl));
-                    startActivity(intent);
-                }
+                // সার্ভার থেকে ডিরেক্ট লিংক পেলে অথবা না পেলে সরাসরি PlayerActivity ওপেন করবে (যাতে activity_player.xml লেআউট কাজ করে)
+                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                intent.putExtra("video_url", videoUrl);
+                intent.putExtra("download_url", (finalLink != null && !finalLink.isEmpty()) ? finalLink : videoUrl);
+                startActivity(intent);
             });
         });
-    }
-
-    private void startDownloadManager(String url) {
-        try {
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-            request.setTitle("Downloading Video");
-            request.setDescription("Saving file securely...");
-            request.allowScanningByMediaScanner();
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Video_" + System.currentTimeMillis() + ".mp4");
-
-            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-            if (manager != null) {
-                manager.enqueue(request);
-                Toast.makeText(this, "Download started successfully!", Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(intent);
-        }
     }
 }
