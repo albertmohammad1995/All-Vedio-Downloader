@@ -41,6 +41,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -169,14 +170,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // স্ক্রিনশট অনুযায়ী আপডেট করা শক্তিশালী ভিডিও ইউআরএল ডিটেক্টর
     private boolean isTargetVideoUrl(String url) {
         if (url == null) return false;
-        return url.contains("youtube.com/watch") || 
-               url.contains("youtu.be/") || 
-               url.contains("facebook.com/watch") || 
-               url.contains("fb.watch") || 
-               url.contains("/videos/") || 
-               url.contains("/reel/");
+        String lower = url.toLowerCase(Locale.ROOT);
+        return lower.contains("youtube.com/watch") || 
+               lower.contains("youtu.be/") || 
+               lower.contains("facebook.com/watch") || 
+               lower.contains("fb.watch") || 
+               lower.contains("/videos/") || 
+               lower.contains("/reel/") ||
+               lower.matches(".*\\.(mp4|webm|mov|m4v)(\\?.*)?$");
     }
 
     private void loadAdMobAd() {
@@ -227,7 +231,6 @@ public class MainActivity extends AppCompatActivity {
             String downloadLink = null;
             try {
                 String encodedUrl = URLEncoder.encode(videoUrl, "UTF-8");
-                // আপনার সঠিক Vercel লাইভ ডোমেন এখানে আপডেট করা হলো
                 String targetUrl = "https://all-vedio-downloaders-aq2p.vercel.app/api/download?url=" + encodedUrl;
                 
                 URL url = new URL(targetUrl);
