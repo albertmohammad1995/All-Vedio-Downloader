@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.webkit.DownloadListener;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -32,8 +33,8 @@ public class PlayerActivity extends AppCompatActivity {
     private String pageUrl = "";
     private String capturedVideoUrl = "";
 
-    // আপনার Vercel প্রজেক্টের সঠিক ডোমেন লিংক এখানে দেওয়া আছে
-    private static final String VERCEL_API_BASE = "https://all-vedio-downloader.vercel.app/api/download?url=";
+    // আপনার সঠিক Vercel লাইভ প্রজেক্টের ডোমেন এখানে আপডেট করা হলো
+    private static final String VERCEL_API_BASE = "https://all-vedio-downloaders-aq2p.vercel.app/api/download?url=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,15 @@ public class PlayerActivity extends AppCompatActivity {
                     }
                 }
                 return super.shouldInterceptRequest(view, request);
+            }
+        });
+
+        // স্ক্রিনশটে থাকা DownloadListener এখানে যুক্ত করা হলো
+        playerWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+            if (url != null && url.startsWith("https://")) {
+                startDownloadManager(url);
+            } else {
+                Toast.makeText(PlayerActivity.this, "Download link is not supported", Toast.LENGTH_SHORT).show();
             }
         });
 
