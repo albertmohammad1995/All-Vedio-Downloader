@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnYoutube = findViewById(R.id.btnYoutube);
         ImageButton btnX = findViewById(R.id.btnX);
 
-        // ব্রাউজ করার সময় স্ক্রিনের নিচে ডান কোণায় ফ্লোটিং ডাউনলোড বাটন তৈরি করা (সার্চ বারে কোনো অটো লিংক বসবে না)
+        // ব্রাউজ করার সময় স্ক্রিনের নিচে ডান কোণায় ফ্লোটিং ডাউনলোড বাটন তৈরি করা
         fabDownload = new com.google.android.material.floatingactionbutton.FloatingActionButton(this);
         fabDownload.setImageResource(android.R.drawable.ic_menu_save);
         fabDownload.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#FF0000")));
@@ -129,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
 
         swipeRefreshLayout.setOnRefreshListener(() -> webView.reload());
 
-        // সার্চ বারে শুধুমাত্র ব্যবহারকারী যা লিখবে বা পেস্ট করবে সেটাই থাকবে, কোনো অটো ইনজেকশন নেই
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             String query = etSearch.getText().toString().trim();
             if (!query.isEmpty()) {
@@ -228,7 +227,8 @@ public class MainActivity extends AppCompatActivity {
             String downloadLink = null;
             try {
                 String encodedUrl = URLEncoder.encode(videoUrl, "UTF-8");
-                String targetUrl = "https://all-vedio-downloaders.vercel.app/api/download?url=" + encodedUrl;
+                // আপনার সঠিক Vercel লাইভ ডোমেন এখানে আপডেট করা হলো
+                String targetUrl = "https://all-vedio-downloaders-aq2p.vercel.app/api/download?url=" + encodedUrl;
                 
                 URL url = new URL(targetUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -256,7 +256,6 @@ public class MainActivity extends AppCompatActivity {
 
             final String finalLink = downloadLink;
             mainHandler.post(() -> {
-                // সার্ভার থেকে ডিরেক্ট লিংক পেলে অথবা না পেলে সরাসরি PlayerActivity ওপেন করবে (যাতে activity_player.xml লেআউট কাজ করে)
                 Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
                 intent.putExtra("video_url", videoUrl);
                 intent.putExtra("download_url", (finalLink != null && !finalLink.isEmpty()) ? finalLink : videoUrl);
