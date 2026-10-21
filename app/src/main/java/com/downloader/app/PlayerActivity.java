@@ -33,7 +33,7 @@ public class PlayerActivity extends AppCompatActivity {
     private String pageUrl = "";
     private String capturedVideoUrl = "";
 
-    // আপনার সঠিক Vercel লাইভ প্রজেক্টের ডোমেন এখানে আপডেট করা হলো
+    // আপনার সঠিক Vercel লাইভ প্রজেক্টের ডোমেন
     private static final String VERCEL_API_BASE = "https://all-vedio-downloaders-aq2p.vercel.app/api/download?url=";
 
     @Override
@@ -71,12 +71,12 @@ public class PlayerActivity extends AppCompatActivity {
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
                 
-                if (url.contains(".mp4") || url.contains(".m3u8") || url.contains("video/") || url.contains("googlevideo.com")) {
+                if (url.contains(".mp4") || url.contains(".m3u8") || url.contains("video/") || url.contains("googlevideo.com") || url.contains("fbcdn")) {
                     Log.d("VideoGrabber", "Captured Video Link: " + url);
-                    if (url.length() > 50) {
+                    if (url.length() > 30) {
                         capturedVideoUrl = url;
                         runOnUiThread(() -> {
-                            btnDownload.setText("Download Video (Link Found)");
+                            btnDownload.setText("Download Ready (Stream Found)");
                         });
                     }
                 }
@@ -84,9 +84,9 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
-        // স্ক্রিনশটে থাকা DownloadListener এখানে যুক্ত করা হলো
+        // WebView ডাউনলোড লিসেনার
         playerWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
-            if (url != null && url.startsWith("https://")) {
+            if (url != null && !url.isEmpty()) {
                 startDownloadManager(url);
             } else {
                 Toast.makeText(PlayerActivity.this, "Download link is not supported", Toast.LENGTH_SHORT).show();
@@ -97,15 +97,20 @@ public class PlayerActivity extends AppCompatActivity {
             playerWebView.loadUrl(pageUrl);
         }
 
-        // ডাউনলোড বাটনে ক্লিক করলে Vercel ব্যাকএন্ড এপিআই কাজ করবে
+        // ডাউনলোড বাটনে ক্লিক করলে মাল্টি-লেয়ার প্রসেসিং শুরু হবে
         btnDownload.setOnClickListener(v -> {
             String currentWebUrl = playerWebView.getUrl();
             
             if (capturedVideoUrl != null && !capturedVideoUrl.isEmpty()) {
+                // ১. যদি WebView কোনো স্ট্রিম লিংক ধরে থাকে, তা দিয়ে ডাউনলোড শুরু হবে
                 startDownloadManager(capturedVideoUrl);
             } else if (currentWebUrl != null && !currentWebUrl.isEmpty()) {
+                // ২. সার্ভার থেকে লিংক ফেচ করার চেষ্টা করবে
                 Toast.makeText(this, "Fetching direct link from server...", Toast.LENGTH_SHORT).show();
                 fetchDirectLinkFromServer(currentWebUrl);
+            } else if (pageUrl != null && !pageUrl.isEmpty()) {
+                Toast.makeText(this, "Fetching direct link from server...", Toast.LENGTH_SHORT).show();
+                fetchDirectLinkFromServer(pageUrl);
             } else {
                 Toast.makeText(this, "Please play the video first!", Toast.LENGTH_LONG).show();
             }
@@ -139,20 +144,19 @@ public class PlayerActivity extends AppCompatActivity {
                         if (directDownloadUrl != null && !directDownloadUrl.isEmpty()) {
                             startDownloadManager(directDownloadUrl);
                         } else {
-                            Toast.makeText(this, "Direct link not found in response!", Toast.LENGTH_SHORT).show();
+                            // সার্ভার থেকে লিংক না পেলে ফলব্যাক হিসেবে মূল পেজ বা ভিডিও ইউআরএল ট্রাই করবে
+                            startDownloadManager(targetUrl);
                         }
                     });
                 } else {
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        Toast.makeText(this, "Failed to extract video stream!", Toast.LENGTH_SHORT).show();
-                    });
+                    // সার্ভার রেসপন্স ফেইল করলেও যেন ডাউনলোড আটকে না যায়, তাই মূল লিংক পাস করবে
+                    new Handler(Looper.getMainLooper()).post(() -> startDownloadManager(targetUrl));
                 }
 
             } catch (Exception e) {
                 Log.e("ApiError", "Error fetching link", e);
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(this, "Server error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                // কোনো রকম এক্সেপশন বা এরর আসলেও ফলব্যাক হিসেবে মূল লিংক দিয়ে ডাউনলোড শুরু করার চেষ্টা করবে
+                new Handler(Looper.getMainLooper()).post(() -> startDownloadManager(targetUrl));
             }
         }).start();
     }
